@@ -1,0 +1,29 @@
+packages:
+  - targets
+  - here
+  - R.matlab
+  - dplyr
+  - tidyr
+  - gt
+  - lme4
+  - sjPlot
+  - ggbeeswarm
+  - car
+  - htmlTable
+  - corrplot
+  - sjmisc
+  - ggExtra
+  - plotly
+  - kableExtra
+  - stringr
+  - broom
+  - mediation
+  - semPlot
+  - lavaan
+  - patchwork
+  - conflicted
+  - renv
+  - readr
+  - tibble
+
+# - flexplot
