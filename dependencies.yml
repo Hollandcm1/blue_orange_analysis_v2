@@ -1,29 +1,37 @@
 packages:
+  # Core pipeline
   - targets
   - here
-  - R.matlab
+  - renv
+  - conflicted
+
+  # Data handling
   - dplyr
   - tidyr
-  - gt
-  - lme4
-  - sjPlot
-  - ggbeeswarm
-  - car
-  - htmlTable
-  - corrplot
-  - sjmisc
-  - ggExtra
-  - plotly
-  - kableExtra
-  - stringr
-  - broom
-  - mediation
-  - semPlot
-  - lavaan
-  - patchwork
-  - conflicted
-  - renv
   - readr
+  - stringr
   - tibble
+  - broom
 
-# - flexplot
+  # Modeling
+  - lme4
+  - mediation
+  - lavaan
+  - car
+
+  # Visualization
+  - ggplot2       
+  - ggExtra
+  - ggbeeswarm
+  - patchwork
+  - corrplot
+  - semPlot
+  - plotly
+  - gt
+  - kableExtra
+  - htmlTable
+  - sjPlot
+  - sjmisc
+
+  # Other utilities
+  - R.matlab

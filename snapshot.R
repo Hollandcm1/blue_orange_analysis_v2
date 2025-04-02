@@ -1,9 +1,12 @@
-# snapshot.R
-source("setup.R")
+# # snapshot.R
+# source("setup.R")
 
-packages <- get_dependencies()
+# packages <- get_dependencies()
 
-install.packages(packages)
+# renv::install(packages)
 
-# snapshot exact package versions
-renv::snapshot()
+# # optional: show what changed before snapshotting
+# renv::status()
+
+# # snapshot exact package versions
+# renv::snapshot()
