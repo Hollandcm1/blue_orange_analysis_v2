@@ -1,3 +1,5 @@
+# contains functions for exploring the composites 
+# such as performance over time
 
 explore_composites <- function(data, version, before_cleaning = TRUE) {
 

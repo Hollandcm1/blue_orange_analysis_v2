@@ -2,10 +2,17 @@
 
 simple_ANOVAs <- function(data, experiment, version) {
 
+  # print("Running simple ANOVAs")
+  
   # Define save paths
   version_string <- paste0(experiment, "_", version)
   output_folder <- here("output", "general analysis", version_string, "ANOVAs")
   sub_folders <- c("performance", "trust", "confidence")
+
+  # print(version_string)
+  # print(output_folder)
+  # print(sub_folders)
+
 
   walk(sub_folders, ~dir.create(here(output_folder, .x), recursive = TRUE, showWarnings = FALSE))
 
@@ -55,4 +62,7 @@ simple_ANOVAs <- function(data, experiment, version) {
 
   # Run for each variable
   walk(c("performance", "trust", "confidence"), run_anova_and_plots)
+
+  return(invisible(TRUE))
+
 }

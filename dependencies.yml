@@ -32,6 +32,8 @@ packages:
   - htmlTable
   - sjPlot
   - sjmisc
+  - flexplot
 
   # Other utilities
   - R.matlab
+

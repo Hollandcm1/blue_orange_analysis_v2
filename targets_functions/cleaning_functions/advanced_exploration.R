@@ -1,3 +1,7 @@
+# contains functions for advanced exploration and 
+# data verification such as trials counts, participant counts
+# change in selections 
+
 advanced_exploration <- function(data, version) {
   print(paste("Creating Advanced Exploratory Data Analysis Plots for:", version))
 

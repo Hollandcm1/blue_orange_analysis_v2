@@ -33,5 +33,6 @@ c(
   source("targets/04A_feedback_50_targets.R")$value,
   source("targets/04B_feedback_70_targets.R")$value,
   source("targets/04C_dependence_50_targets.R")$value,
-  source("targets/04D_dependence_70_targets.R")$value
+  source("targets/04D_dependence_70_targets.R")$value,
+  source("targets/04_general_analysis_targets.R")$value
 )

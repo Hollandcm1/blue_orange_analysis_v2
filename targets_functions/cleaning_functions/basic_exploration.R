@@ -1,3 +1,6 @@
+# contains functions for basic exploration of the data
+# such as plotting response times, accuracy, %corlor
+
 basic_exploration <- function(data, version) {
 
   # Set output folder
