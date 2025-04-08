@@ -47,7 +47,8 @@ data_formatting_and_corrections <- function(data, version) {
       condition = as.factor(condition),
       experiment = as.factor(experiment),
       correct1 = as.numeric(as.character(replace(correct1, is.nan(correct1), NA))),
-      correct2 = as.numeric(as.character(replace(correct2, is.nan(correct2), NA)))
+      correct2 = as.numeric(as.character(replace(correct2, is.nan(correct2), NA))),
+      reliability_factor = as.numeric(reliability_level),
     )
 
   return(data)

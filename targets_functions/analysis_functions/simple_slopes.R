@@ -1,12 +1,12 @@
 
 
-confidence_by_performance_calibration <- function(data, experiment, version) {
+confidence_by_performance_slopes <- function(data, experiment, version) {
 
   source(here("targets_functions/other_functions/data_summary_functions.R"))
 
   # Define save path
   version_string <- paste0(experiment, "_", version)
-  output_folder <- here("output", "calibrations", version_string)
+  output_folder <- here("output", "slopes", version_string)
   sub_folders <- c("confidence_calibration")
   
   walk(sub_folders, ~dir.create(here(output_folder, .x), recursive = TRUE, showWarnings = FALSE))
@@ -95,13 +95,13 @@ confidence_by_performance_calibration <- function(data, experiment, version) {
 }
 
 
-trust_by_reliability_calibration <- function(data, experiment, version) {
+trust_by_reliability_slopes <- function(data, experiment, version) {
 
   source(here("targets_functions/other_functions/data_summary_functions.R"))
 
   # Define save path
   version_string <- paste0(experiment, "_", version)
-  output_folder <- here("output", "calibrations", version_string)
+  output_folder <- here("output", "slopes", version_string)
   sub_folders <- c("trust_calibration")
 
   walk(sub_folders, ~dir.create(here(output_folder, .x), recursive = TRUE, showWarnings = FALSE))

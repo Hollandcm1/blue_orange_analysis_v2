@@ -12,11 +12,20 @@ list(
     command = simple_figures(data_feedback_50, experiment = "feedback", version = "50")
   ),
   tar_target(
-    name = feedback_50_general_confidence_by_performance_calibration,
-    command = confidence_by_performance_calibration(data_feedback_50, experiment = "feedback", version = "50")
+    name = feedback_50_general_confidence_by_performance_slopes,
+    command = confidence_by_performance_slopes(data_feedback_50, experiment = "feedback", version = "50")
   ),
   tar_target(
-    name = feedback_50_general_trust_by_reliability_calibration,
-    command = trust_by_reliability_calibration(data_feedback_50, experiment = "feedback", version = "50")
+    name = feedback_50_general_trust_by_reliability_slopes,
+    command = trust_by_reliability_slopes(data_feedback_50, experiment = "feedback", version = "50")
+  ),
+  tar_target(
+    name = feedback_50_original_BO_model,
+    command = original_BO(data_feedback_50, version = "50", experiment = "feedback")
+  ),
+
+  tar_target(
+    name = data_feedback_50_specific,
+    command = data_feedback_50
   )
 )

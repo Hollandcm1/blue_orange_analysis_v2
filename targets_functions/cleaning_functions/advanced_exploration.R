@@ -164,6 +164,43 @@ advanced_exploration <- function(data, version) {
     theme_minimal()
   suppressMessages(ggsave(here(output_folder, "_combined", "color_selections.png"), plot = p, width = 20))
 
+  # response times 1 per participant
+  response_times <- data %>%
+    group_by(p_num) %>%
+    summarise(mean_response_time = mean(response_time1, na.rm = TRUE), .groups = "drop")
+  p <- ggplot(response_times, aes(x = p_num, y = mean_response_time)) +
+    geom_point() +
+    labs(x = "Participant", y = "Mean Response Time") +
+    theme_minimal()
+  suppressMessages(ggsave(here(output_folder, "_combined", "response_times.png"), plot = p))
+
+  # response times 2 per participant
+  response_times2 <- data %>%
+    group_by(p_num) %>%
+    summarise(mean_response_time = mean(response_time2, na.rm = TRUE), .groups = "drop")
+  p <- ggplot(response_times2, aes(x = p_num, y = mean_response_time)) +
+    geom_point() +
+    labs(x = "Participant", y = "Mean Response Time 2") +
+    theme_minimal()
+  suppressMessages(ggsave(here(output_folder, "_combined", "response_times2.png"), plot = p))
+  
+  # response times 1 per participant as boxplot
+  p <- ggplot(data, aes(x = p_num, y = response_time1, group = p_num)) +
+    geom_boxplot() +
+    labs(x = "Participant", y = "Response Time 1") +
+    theme_minimal() +
+    ylim(0, 10000)
+  suppressMessages(ggsave(here(output_folder, "_combined", "response_times1_boxplot.png"), plot = p, width = 40))
+
+  if (version != "feedback") {
+    # response times 2 per participant as boxplot
+    p <- ggplot(data, aes(x = p_num, y = response_time2, group = p_num)) +
+      geom_boxplot() +
+      labs(x = "Participant", y = "Response Time 2") +
+      theme_minimal() +
+      ylim(0, 10000)
+    suppressMessages(ggsave(here(output_folder, "_combined", "response_times2_boxplot.png"), plot = p, width = 40))
+  }
 
   invisible(NULL)
 }
