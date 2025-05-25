@@ -19,5 +19,14 @@ list(
   tar_target(
     feedback_70_general_trust_by_reliability_slopes,
     trust_by_reliability_slopes(data_feedback_70, experiment = "feedback", version = '70')
+  ),
+  tar_target(
+    feedback_70_original_BO_model,
+    original_BO(data_feedback_70, version = "70", experiment = "feedback")
+  ),
+
+  tar_target(
+    data_feedback_70_specific,
+    data_feedback_70
   )
 )
