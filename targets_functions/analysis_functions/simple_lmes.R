@@ -7,7 +7,7 @@ simple_LMEs <- function(data, experiment, version) {
   # Define save paths
   version_string <- paste0(experiment, "_", version)
   output_folder <- here("output", "general analysis", version_string, "LMEs")
-  sub_folders <- c("performance", "trust", "confidence")
+  sub_folders <- c("performance", "trust", "confidence", "dependence")
 
   walk(sub_folders, ~dir.create(here(output_folder, .x), recursive = TRUE, showWarnings = FALSE))
 
@@ -19,6 +19,7 @@ simple_LMEs <- function(data, experiment, version) {
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block),
+      dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
 
@@ -63,5 +64,21 @@ simple_LMEs <- function(data, experiment, version) {
   writeLines(as.character(model_summary), here(output_folder, "performance", "performance_LME.txt"))
   model_summary_formated <- tab_model(model)
   writeLines(as.character(model_summary_formated$knitr), here(output_folder, "performance", "performance_LME_formatted.html"))
+
+  
+  ##################
+  ### Dependence ###
+  ##################
+
+  if (experiment == "dependence") {
+    model <- lmer(
+      dependence ~ condition * reliability_level * trust * confidence + (1 | p_num),
+      block_summary
+    )
+    model_summary <- capture.output(summary(model))
+    writeLines(as.character(model_summary), here(output_folder, "dependence", "dependence_LME.txt"))
+    model_summary_formated <- tab_model(model)
+    writeLines(as.character(model_summary_formated$knitr), here(output_folder, "dependence", "dependence_LME_formatted.html"))
+  }
 
 }

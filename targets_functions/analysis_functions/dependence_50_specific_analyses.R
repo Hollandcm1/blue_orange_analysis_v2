@@ -5,6 +5,7 @@
 # library(lme4)
 # library(sjPlot)
 # library(ggplot2)
+# library(flexplot)
 
 # data <- tar_read("data_reliance_50_specific")
 
@@ -95,7 +96,7 @@ seperate_increasing_vs_decreasing_LMES <- function(data){
     geom_point(alpha = 0.3) +
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
-    labs(title = "Dependence by Trust, Confidence, and Reliability Level (Decreasing)",
+    labs(title = "Dependence by Trust and Reliability Level (Decreasing)",
         x = "Trust", y = "Dependence") +
     xlim(0, 100) +
     ylim(0, 100)
@@ -108,23 +109,74 @@ seperate_increasing_vs_decreasing_LMES <- function(data){
     width = 10, height = 8
   ))
 
-  p_decreasing <- ggplot(block_summary_decreasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
+  # p_decreasing <- ggplot(block_summary_decreasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
+  #   geom_point(alpha = 0.3) +
+  #   geom_smooth(method = "lm", alpha = 0.1) +
+  #   theme_minimal() +
+  #   labs(title = "Dependence by Trust, Confidence, and Reliability Level (Decreasing)",
+  #       x = "Trust", y = "Dependence") +
+  #   facet_wrap(~ reliability_level) +
+  #   xlim(0, 100) +
+  #   ylim(0, 100)
+
+  # suppressMessages(ggsave(
+  #   here(save_path, "dependence_decreasing_by_trust_reliability_facet.png"),
+  #   plot = p_decreasing, device = "png",
+  #   width = 10, height = 8
+  # ))
+
+  # make factor version of reliability_level
+  block_summary_decreasing <- block_summary_decreasing %>%
+    mutate(reliability_level_factor = as.factor(reliability_level))
+
+  p <- flexplot(
+    data = block_summary_decreasing,
+    dependence ~ trust + confidence | reliability_level_factor,
+    method = 'lm'
+  )
+
+  suppressMessages(ggsave(
+    here(save_path, "dependence_decreasing_by_trust_confidence_reliability_flexplot.png"),
+    plot = p, device = "png",
+    width = 15, height = 4
+  ))
+
+
+  p_decreasing <- ggplot(block_summary_decreasing, aes(x = confidence, y = dependence, color = as.factor(reliability_level))) +
     geom_point(alpha = 0.3) +
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
-    labs(title = "Dependence by Trust, Confidence, and Reliability Level (Decreasing)",
-        x = "Trust", y = "Dependence") +
-    facet_wrap(~ reliability_level) +
+    labs(title = "Dependence by Confidence, and Reliability Level (Decreasing)",
+        x = "COnfidence", y = "Dependence") +
     xlim(0, 100) +
     ylim(0, 100)
 
   suppressMessages(ggsave(
-    here(save_path, "dependence_decreasing_by_trust_reliability_facet.png"),
+    here(save_path, "dependence_decreasing_by_confidence_reliability.png"),
     plot = p_decreasing, device = "png",
     width = 10, height = 8
   ))
-  
 
+  block_summary_decreasing <- block_summary_decreasing %>%
+    mutate(confidence_group = ifelse(confidence <= median(confidence, na.rm = TRUE), "Low", "High")) %>%
+    filter(!is.na(confidence_group))
+
+  # --- Dependence (y) by Trust (x) by Reliability Level (color) by Confidence (facet) for Decreasing condition ---
+  p_increasing_confidence <- ggplot(block_summary_decreasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal() +
+    labs(title = "Dependence by Trust, Reliability Level, Confidene (Decreasing)",
+        x = "Trust", y = "Dependence") +
+    facet_wrap(~ confidence_group) +
+    xlim(0, 100) +
+    ylim(0, 100)
+
+  suppressMessages(ggsave(
+    here(save_path, "dependence_increasing_by_trust_reliability_confidence_facet.png"),
+    plot = p_increasing_confidence, device = "png",
+    width = 12, height = 6
+  ))
 
 }
 
