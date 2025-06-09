@@ -6,6 +6,7 @@
 # library(sjPlot)
 # library(ggplot2)
 # library(flexplot)
+# library(glmmTMB)
 
 # data <- tar_read("data_reliance_50_specific")
 
@@ -67,6 +68,33 @@ seperate_increasing_vs_decreasing_LMES <- function(data){
   writeLines(as.character(model_summary), here(save_path, "dependence_decreasing_LME.txt"))
   model_summary_formated <- tab_model(model_decreasing)
   writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_decreasing_LME_formatted.html"))
+
+  # --- Beta Model ---
+  
+  # rescale dependence to be 0-1
+  block_summary_increasing <- block_summary_increasing %>%
+    mutate(dependence = (dependence - min(dependence, na.rm = TRUE)) / 
+             (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE)))
+
+  block_summary_decreasing <- block_summary_decreasing %>%
+    mutate(dependence = (dependence - min(dependence, na.rm = TRUE)) / 
+             (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE)))
+
+  # Fit beta regression model for increasing condition
+  model_increasing_beta <- glmmTMB(
+    dependence ~ trust * confidence * reliability_level + (1 | p_num),
+    data = block_summary_increasing,
+    family = beta_family(link = "logit")
+  )
+  model_summary <- capture.output(summary(model_increasing_beta))
+  writeLines(as.character(model_summary), here(save_path, "dependence_increasing_beta_LME.txt"))
+  model_summary_formated <- tab_model(model_increasing_beta)
+  writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_increasing_beta_LME_formatted.html"))
+
+  # Fit beta regression model for decreasing condition
+  
+
+  
 
 
   #############
