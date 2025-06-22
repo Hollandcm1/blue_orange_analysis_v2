@@ -8,19 +8,19 @@
 # library(flexplot)
 # library(glmmTMB)
 
-# data <- tar_read("data_reliance_50_specific")
+# data <- tar_read("data_reliance_70_specific")
 
 # analyze increasing and decreasing groups seperately
-seperate_increasing_vs_decreasing_LMES_50 <- function(data){
+seperate_increasing_vs_decreasing_LMES_70 <- function(data){
 
-  save_path <- here("output", "specific", "dependence_50", "seperate_increasing_vs_decreasing_LMES")
+  save_path <- here("output", "specific", "dependence_70", "seperate_increasing_vs_decreasing_LMES")
   dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
 
   data_increasing <- data %>%
-    filter(condition == "50% IR")
+    filter(condition == "70% IR")
 
   data_decreasing <- data %>%
-    filter(condition == "50% DR")
+    filter(condition == "70% DR")
 
   # Summarize data
   block_summary_increasing <- data_increasing %>%
@@ -107,9 +107,9 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
     labs(title = "Dependence by Trust, Confidence, and Reliability Level (Increasing)",
-        x = "Trust", y = "Dependence") +
-    xlim(0, 100) +
-    ylim(0, 100)
+        x = "Trust", y = "Dependence") #+
+    # xlim(0, 100) +
+    #ylim(0, 100)
 
   # p_increasing
 
@@ -209,7 +209,7 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
 }
 
 
-dependence_LME_50 <- function(data, version){
+dependence_LME_70 <- function(data, version){
 
   save_path <- here("output", "specific", paste0("dependence_", version), "dependence_LME")
   dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
@@ -244,6 +244,21 @@ dependence_LME_50 <- function(data, version){
   ### Plots ###
   #############
 
-  # not being done due to complexity
+  # plot dependence (y) by confidence (x) by reliability_level (color) by condition (facet)
+  p <- ggplot(block_summary, aes(x = confidence, y = dependence, color = as.factor(reliability_level))) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal() +
+    labs(# title = "Dependence by Confidence and Reliability Level",
+         x = "Confidence", y = "Dependence") +
+    facet_wrap(~ condition) +
+    xlim(0, 100) +
+    ylim(0, 100)
+
+  suppressMessages(ggsave(
+    here(save_path, "dependence_by_confidence_reliability_facet.png"),
+    plot = p, device = "png",
+    width = 14, height = 6
+  ))
 
 } 

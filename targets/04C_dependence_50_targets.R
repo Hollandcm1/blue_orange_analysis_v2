@@ -31,12 +31,12 @@ list(
     ),
 
     tar_target(
-        seperate_increasing_vs_decreasing_analysis,
-        seperate_increasing_vs_decreasing_LMES(data_reliance_50_specific)
+        seperate_increasing_vs_decreasing_analysis_50,
+        seperate_increasing_vs_decreasing_LMES_50(data_reliance_50_specific)
     ), 
     tar_target(
-        dependence_general_LME, 
-        dependence_LME(data_reliance_50_specific, version = "50")
+        dependence_general_LME_50, 
+        dependence_LME_50(data_reliance_50_specific, version = "50")
     )
 
 
