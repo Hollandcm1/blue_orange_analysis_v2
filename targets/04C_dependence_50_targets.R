@@ -24,6 +24,10 @@ list(
         reliance_50_original_BO_model,
         original_BO(data_reliance_50, version = "50", experiment = "dependence")
     ),
+    tar_target(
+        reliance_50_original_BO_model_sudo_reliability,
+        original_BO_sudo_reliability(data_reliance_50, version = "50", experiment = "dependence")
+    ),
 
     tar_target(
         data_reliance_50_specific, #this is to make a new layers in tar vis

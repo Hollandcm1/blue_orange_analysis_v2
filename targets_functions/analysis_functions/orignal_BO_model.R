@@ -24,6 +24,15 @@ original_BO <- function(data, version, experiment) {
   model_summary_formated <- tab_model(model)
   writeLines(as.character(model_summary_formated$knitr), here(output_folder, "trust", "trust_LME_formatted.html"))
 
+  model <- lmer(
+    trust ~ condition * block * confidence + (1 | p_num),
+    block_summary
+  )
+  model_summary <- capture.output(summary(model))
+  writeLines(as.character(model_summary), here(output_folder, "trust", "trust_LME_block.txt"))
+  model_summary_formated <- tab_model(model)
+  writeLines(as.character(model_summary_formated$knitr), here(output_folder, "trust", "trust_LME_formatted_block.html"))
+
   #############
   ### Plots ###
   #############
@@ -33,8 +42,11 @@ original_BO <- function(data, version, experiment) {
     geom_point(alpha = 0.3) +
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
-    labs(title = "Trust by Reliability Level, Confidence, and Condition",
-         x = "Confidence", y = "Trust") +
+    labs(
+      title = "Trust by Reliability Level, Confidence, and Condition",
+      x = "Confidence", y = "Trust",
+      color = "Reliability level"
+    ) +
     facet_wrap(~ condition) +
     xlim(0, 100) +
     ylim(0, 100)
@@ -44,13 +56,35 @@ original_BO <- function(data, version, experiment) {
     width = 10, height = 8
   ))
 
+  # --- Trust by Block, Confidence, and Condition ---
+  p <- ggplot(block_summary, aes(x = confidence, y = trust, color = as.factor(block))) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal() +
+    labs(
+      title = "Trust by Block, Confidence, and Condition",
+      x = "Confidence", y = "Trust",
+      color = "Block"
+    ) +
+    facet_wrap(~ condition) +
+    xlim(0, 100) +
+    ylim(0, 100)
+  suppressMessages(ggsave(
+    here(output_folder, "trust", "3_way_trust_by_block_and_condition.png"),
+    plot = p, device = "png",
+    width = 10, height = 8
+  ))
+
   # --- Trust by Reliability Level and Condition ---
   p <- ggplot(block_summary, aes(x = reliability_level, y = trust, color = as.factor(condition))) +
     geom_point(alpha = 0.3) +
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
-    labs(title = "Trust by Reliability Level and Condition",
-         x = "Reliability Level", y = "Trust") +
+    labs(
+      title = "Trust by Reliability Level and Condition",
+      x = "Reliability Level", y = "Trust",
+      color = "Condition"
+    ) +
     xlim(0, 100) +
     ylim(0, 100)
   suppressMessages(ggsave(
@@ -64,8 +98,11 @@ original_BO <- function(data, version, experiment) {
     geom_point(alpha = 0.3) +
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
-    labs(title = "Trust by Reliability Level and Confidence",
-         x = "Reliability Level", y = "Trust") +
+    labs(
+      title = "Trust by Reliability Level and Confidence",
+      x = "Reliability Level", y = "Trust",
+      color = "Confidence"
+    ) +
     xlim(0, 100) +
     ylim(0, 100)
   suppressMessages(ggsave(
@@ -79,8 +116,11 @@ original_BO <- function(data, version, experiment) {
     geom_point(alpha = 0.3) +
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
-    labs(title = "Trust by Confidence and Condition",
-         x = "Confidence", y = "Trust") +
+    labs(
+      title = "Trust by Confidence and Condition",
+      x = "Confidence", y = "Trust",
+      color = "Condition"
+    ) +
     xlim(0, 100) +
     ylim(0, 100)
   suppressMessages(ggsave(
@@ -94,8 +134,10 @@ original_BO <- function(data, version, experiment) {
     geom_point(alpha = 0.3) +
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
-    labs(title = "Trust by Reliability Level",
-         x = "Reliability Level", y = "Trust") +
+    labs(
+      title = "Trust by Reliability Level",
+      x = "Reliability Level", y = "Trust"
+    ) +
     # xlim(0, 100) +
     ylim(0, 100)
   suppressMessages(ggsave(
@@ -109,8 +151,10 @@ original_BO <- function(data, version, experiment) {
     geom_beeswarm(alpha = 0.3) +
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
-    labs(title = "Trust by Condition",
-         x = "Condition", y = "Trust") +
+    labs(
+      title = "Trust by Condition",
+      x = "Condition", y = "Trust"
+    ) +
     # xlim(0, 100) +
     ylim(0, 100)
   suppressMessages(ggsave(
@@ -124,8 +168,10 @@ original_BO <- function(data, version, experiment) {
     geom_point(alpha = 0.3) +
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
-    labs(title = "Trust by Confidence",
-         x = "Confidence", y = "Trust") +
+    labs(
+      title = "Trust by Confidence",
+      x = "Confidence", y = "Trust"
+    ) +
     xlim(0, 100) +
     ylim(0, 100)
   suppressMessages(ggsave(

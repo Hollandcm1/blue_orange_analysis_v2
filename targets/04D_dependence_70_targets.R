@@ -23,6 +23,10 @@ list(
     reliance_70_original_BO_model,
     original_BO(data_reliance_70, version = "70", experiment = "dependence")
   ),
+  tar_target(
+    reliance_70_original_BO_model_sudo_reliability,
+    original_BO_sudo_reliability(data_reliance_70, version = "70", experiment = "dependence")
+  ),
   
   tar_target(
     data_reliance_70_specific,
