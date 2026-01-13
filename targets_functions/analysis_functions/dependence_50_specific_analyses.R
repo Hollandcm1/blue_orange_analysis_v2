@@ -80,16 +80,16 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     mutate(dependence = (dependence - min(dependence, na.rm = TRUE)) / 
              (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE)))
 
-  # Fit beta regression model for increasing condition
-  model_increasing_beta <- glmmTMB(
-    dependence ~ trust * confidence * reliability_level + (1 | p_num),
-    data = block_summary_increasing,
-    family = beta_family(link = "logit")
-  )
-  model_summary <- capture.output(summary(model_increasing_beta))
-  writeLines(as.character(model_summary), here(save_path, "dependence_increasing_beta_LME.txt"))
-  model_summary_formated <- tab_model(model_increasing_beta)
-  writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_increasing_beta_LME_formatted.html"))
+  # # Fit beta regression model for increasing condition
+  # model_increasing_beta <- glmmTMB(
+  #   dependence ~ trust * confidence * reliability_level + (1 | p_num),
+  #   data = block_summary_increasing,
+  #   family = beta_family(link = "logit")
+  # )
+  # model_summary <- capture.output(summary(model_increasing_beta))
+  # writeLines(as.character(model_summary), here(save_path, "dependence_increasing_beta_LME.txt"))
+  # model_summary_formated <- tab_model(model_increasing_beta)
+  # writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_increasing_beta_LME_formatted.html"))
 
   # Fit beta regression model for decreasing condition
   
@@ -109,7 +109,7 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     labs(title = "Dependence by Trust, Confidence, and Reliability Level (Increasing)",
         x = "Trust", y = "Dependence") +
     xlim(0, 100) +
-    ylim(0, 100)
+    ylim(0, 1)
 
   # p_increasing
 
