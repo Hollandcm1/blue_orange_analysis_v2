@@ -119,6 +119,17 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     width = 10, height = 8
   ))
 
+  # version where reliability is on x axis, trust is color
+  p_increasing <- ggplot(block_summary_increasing, aes(x = reliability_level, y = dependence, color = trust)) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal() +
+    labs(title = "Dependence by Reliability Level, Trust, and Confidence (Increasing)",
+         x = "Reliability Level", y = "Dependence") +
+    xlim(50, 100) +
+    ylim(0, 1)
+
+
   # --- Dependence by Trust, Confidence, and Reliability Level (Decreasing) ---
   p_decreasing <- ggplot(block_summary_decreasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
     geom_point(alpha = 0.3) +
