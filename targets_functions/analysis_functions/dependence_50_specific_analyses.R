@@ -7,6 +7,8 @@
 # library(ggplot2)
 # library(flexplot)
 # library(glmmTMB)
+# library(GGally)
+# library(ggbeeswarm)
 
 # data <- tar_read("data_reliance_50_specific")
 
@@ -215,6 +217,90 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     here(save_path, "dependence_increasing_by_trust_reliability_confidence_facet.png"),
     plot = p_increasing_confidence, device = "png",
     width = 12, height = 6
+  ))
+
+  # --- Parallel Coordinates Plot (Increasing) ---
+  block_summary_increasing$reliability_color <- as.factor(block_summary_increasing$reliability_level)
+  parcoord_data_inc <- block_summary_increasing %>%
+    mutate(
+      trust = pmax((trust - 30) / 70, 0),
+      confidence = pmax((confidence - 30) / 70, 0),
+      dependence = (dependence - min(dependence, na.rm = TRUE)) /
+        (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE)),
+      reliability_level = (reliability_level - min(reliability_level, na.rm = TRUE)) /
+        (max(reliability_level, na.rm = TRUE) - min(reliability_level, na.rm = TRUE))
+    )
+  parcoord_cols_inc <- match(
+    c("dependence", "trust", "confidence", "reliability_level"),
+    names(parcoord_data_inc))
+
+  p_parcoord_increasing <- GGally::ggparcoord(
+    data = parcoord_data_inc,
+    columns = parcoord_cols_inc,
+    groupColumn = "reliability_color",
+    scale = "globalminmax",
+    alphaLines = 0.3
+  ) +
+    ggbeeswarm::geom_quasirandom(
+      groupOnX = TRUE,
+      width = 0.15,
+      alpha = 0.4,
+      size = 1
+    ) +
+    theme_minimal() +
+    labs(
+      title = "Parallel Coordinates: Dependence, Trust, Confidence, Reliability (Increasing)",
+      x = "Variable",
+      y = "Scaled Value",
+      color = "Reliability Level"
+    )
+
+  suppressMessages(ggsave(
+    here(save_path, "parallel_coordinates_increasing.png"),
+    plot = p_parcoord_increasing, device = "png",
+    width = 10, height = 8
+  ))
+
+  # --- Parallel Coordinates Plot (Decreasing) ---
+  block_summary_decreasing$reliability_color <- as.factor(block_summary_decreasing$reliability_level)
+  parcoord_data_dec <- block_summary_decreasing %>%
+    mutate(
+      trust = pmax((trust - 30) / 70, 0),
+      confidence = pmax((confidence - 30) / 70, 0),
+      dependence = (dependence - min(dependence, na.rm = TRUE)) /
+        (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE)),
+      reliability_level = (reliability_level - min(reliability_level, na.rm = TRUE)) /
+        (max(reliability_level, na.rm = TRUE) - min(reliability_level, na.rm = TRUE))
+    )
+  parcoord_cols_dec <- match(
+    c("dependence", "trust", "confidence", "reliability_level"),
+    names(parcoord_data_dec))
+
+  p_parcoord_decreasing <- GGally::ggparcoord(
+    data = parcoord_data_dec,
+    columns = parcoord_cols_dec,
+    groupColumn = "reliability_color",
+    scale = "globalminmax",
+    alphaLines = 0.3
+  ) +
+    ggbeeswarm::geom_quasirandom(
+      groupOnX = TRUE,
+      width = 0.15,
+      alpha = 0.4,
+      size = 1
+    ) +
+    theme_minimal() +
+    labs(
+      title = "Parallel Coordinates: Dependence, Trust, Confidence, Reliability (Decreasing)",
+      x = "Variable",
+      y = "Scaled Value",
+      color = "Reliability Level"
+    )
+
+  suppressMessages(ggsave(
+    here(save_path, "parallel_coordinates_decreasing.png"),
+    plot = p_parcoord_decreasing, device = "png",
+    width = 10, height = 8
   ))
 
 }
