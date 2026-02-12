@@ -71,14 +71,17 @@ seperate_increasing_vs_decreasing_LMES_70 <- function(data){
 
   # --- Beta Model ---
   
-  # rescale dependence to be 0-1
+  # rescale dependence to be 0-1, then squeeze to open interval (0, 1)
+  # using Smithson & Verkuilen (2006) transformation for beta regression
   block_summary_increasing <- block_summary_increasing %>%
-    mutate(dependence = (dependence - min(dependence, na.rm = TRUE)) / 
-             (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE)))
+    mutate(dependence = (dependence - min(dependence, na.rm = TRUE)) /
+             (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE))) %>%
+    mutate(dependence = (dependence * (n() - 1) + 0.5) / n())
 
   block_summary_decreasing <- block_summary_decreasing %>%
-    mutate(dependence = (dependence - min(dependence, na.rm = TRUE)) / 
-             (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE)))
+    mutate(dependence = (dependence - min(dependence, na.rm = TRUE)) /
+             (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE))) %>%
+    mutate(dependence = (dependence * (n() - 1) + 0.5) / n())
 
   # Fit beta regression model for increasing condition
   model_increasing_beta <- glmmTMB(
@@ -261,4 +264,136 @@ dependence_LME_70 <- function(data, version){
     width = 14, height = 6
   ))
 
-} 
+}
+
+
+dependence_ANOVA_reliability_version <- function(data, version) {
+
+  save_path <- here("output", "specific", paste0("dependence_", version), "dependence_ANOVA_reliability_version")
+  dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
+
+  # Summarize data
+  block_summary <- data %>%
+    group_by(p_num, condition, block) %>%
+    summarise(
+      trust = mean(trust, na.rm = TRUE),
+      confidence = mean(confidence, na.rm = TRUE),
+      reliability_level = mean(reliability_level, na.rm = TRUE),
+      performance = mean(percent_correct_block, na.rm = TRUE),
+      dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
+      .groups = "drop"
+    )
+
+  variables <- c("trust", "performance", "confidence", "dependence")
+
+  # Save means by condition
+  condition_means <- block_summary %>%
+    group_by(condition) %>%
+    summarise(
+      across(all_of(variables),
+             list(mean = ~mean(.x, na.rm = TRUE), sd = ~sd(.x, na.rm = TRUE))),
+      .groups = "drop")
+  write.csv(condition_means, here(save_path, "means_by_condition.csv"), row.names = FALSE)
+
+  # Factor versions for sphericity testing
+  block_summary$reliability_level_f <- as.factor(block_summary$reliability_level)
+  block_summary$p_num <- as.factor(block_summary$p_num)
+
+  for (variable in variables) {
+    formula <- as.formula(paste(variable, "~ reliability_level * condition + Error(p_num)"))
+    result <- aov(formula, data = block_summary)
+    summary_result <- capture.output(summary(result))
+    eta_result <- capture.output(print(eta_squared(result, partial = TRUE)))
+
+    # Mauchly's sphericity test + GG/HF corrections
+    afex_model <- aov_ez(
+      id = "p_num", dv = variable, data = block_summary,
+      within = "reliability_level_f", between = "condition", type = 3
+    )
+    sphericity_result <- capture.output(print(summary(afex_model)))
+
+    writeLines(c(summary_result, "", "Partial Eta Squared:", eta_result,
+                 "", "Sphericity Tests:", sphericity_result),
+               here(save_path, paste0(variable, "_ANOVA.txt")))
+
+    p <- ggplot(block_summary, aes(x = reliability_level, y = .data[[variable]], color = condition)) +
+      geom_beeswarm(alpha = 0.3) +
+      geom_smooth(method = "lm", alpha = 0.1) +
+      theme_minimal() +
+      labs(x = "Reliability Level", y = str_to_title(variable))
+
+    suppressMessages(ggsave(
+      here(save_path, paste0(variable, "_by_reliability_and_condition.png")),
+      plot = p, device = "png",
+      width = 8, height = 6
+    ))
+  }
+
+  return(invisible(TRUE))
+}
+
+
+dependence_ANOVA_block_version <- function(data, version) {
+
+  save_path <- here("output", "specific", paste0("dependence_", version), "dependence_ANOVA_block_version")
+  dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
+
+  # Summarize data
+  block_summary <- data %>%
+    group_by(p_num, condition, block) %>%
+    summarise(
+      trust = mean(trust, na.rm = TRUE),
+      confidence = mean(confidence, na.rm = TRUE),
+      reliability_level = mean(reliability_level, na.rm = TRUE),
+      performance = mean(percent_correct_block, na.rm = TRUE),
+      dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
+      .groups = "drop"
+    )
+
+  variables <- c("trust", "performance", "confidence", "dependence")
+
+  # Save means by condition
+  condition_means <- block_summary %>%
+    group_by(condition) %>%
+    summarise(
+      across(all_of(variables),
+             list(mean = ~mean(.x, na.rm = TRUE), sd = ~sd(.x, na.rm = TRUE))),
+      .groups = "drop")
+  write.csv(condition_means, here(save_path, "means_by_condition.csv"), row.names = FALSE)
+
+  # Factor versions for sphericity testing
+  block_summary$block_f <- as.factor(block_summary$block)
+  block_summary$p_num <- as.factor(block_summary$p_num)
+
+  for (variable in variables) {
+    formula <- as.formula(paste(variable, "~ block * condition + Error(p_num)"))
+    result <- aov(formula, data = block_summary)
+    summary_result <- capture.output(summary(result))
+    eta_result <- capture.output(print(eta_squared(result, partial = TRUE)))
+
+    # Mauchly's sphericity test + GG/HF corrections
+    afex_model <- aov_ez(
+      id = "p_num", dv = variable, data = block_summary,
+      within = "block_f", between = "condition", type = 3
+    )
+    sphericity_result <- capture.output(print(summary(afex_model)))
+
+    writeLines(c(summary_result, "", "Partial Eta Squared:", eta_result,
+                 "", "Sphericity Tests:", sphericity_result),
+               here(save_path, paste0(variable, "_ANOVA.txt")))
+
+    p <- ggplot(block_summary, aes(x = block, y = .data[[variable]], color = condition)) +
+      geom_beeswarm(alpha = 0.3) +
+      geom_smooth(method = "lm", alpha = 0.1) +
+      theme_minimal() +
+      labs(x = "Block", y = str_to_title(variable))
+
+    suppressMessages(ggsave(
+      here(save_path, paste0(variable, "_by_block_and_condition.png")),
+      plot = p, device = "png",
+      width = 8, height = 6
+    ))
+  }
+
+  return(invisible(TRUE))
+}

@@ -34,6 +34,12 @@ packages:
   - sjmisc
   - flexplot
 
+  # Effect sizes
+  - effectsize
+
+  # Factorial ANOVA / Sphericity
+  - afex
+
   # Other utilities
   - R.matlab
   - glmmTMB
