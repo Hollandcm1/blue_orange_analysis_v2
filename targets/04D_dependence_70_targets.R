@@ -48,5 +48,13 @@ list(
     tar_target(
         dependence_ANOVA_block_version_70,
         dependence_ANOVA_block_version(data_reliance_70_specific, version = "70")
+    ),
+    tar_target(
+        dependence_RM_ANOVA_reliability_version_70,
+        dependence_RM_ANOVA_reliability_version(data_reliance_70_specific, version = "70")
+    ),
+    tar_target(
+        dependence_RM_ANOVA_block_version_70,
+        dependence_RM_ANOVA_block_version(data_reliance_70_specific, version = "70")
     )
 )
