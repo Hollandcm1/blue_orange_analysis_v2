@@ -32,5 +32,22 @@ list(
   tar_target(
     data_feedback_70_specific,
     data_feedback_70
+  ),
+
+  tar_target(
+    feedback_ANOVA_reliability_version_70,
+    feedback_ANOVA_reliability_version(data_feedback_70_specific, version = "70")
+  ),
+  tar_target(
+    feedback_ANOVA_block_version_70,
+    feedback_ANOVA_block_version(data_feedback_70_specific, version = "70")
+  ),
+  tar_target(
+    feedback_RM_ANOVA_reliability_version_70,
+    feedback_RM_ANOVA_reliability_version(data_feedback_70_specific, version = "70")
+  ),
+  tar_target(
+    feedback_RM_ANOVA_block_version_70,
+    feedback_RM_ANOVA_block_version(data_feedback_70_specific, version = "70")
   )
 )

@@ -31,5 +31,22 @@ list(
   tar_target(
     name = data_feedback_50_specific,
     command = data_feedback_50
+  ),
+
+  tar_target(
+    feedback_ANOVA_reliability_version_50,
+    feedback_ANOVA_reliability_version(data_feedback_50_specific, version = "50")
+  ),
+  tar_target(
+    feedback_ANOVA_block_version_50,
+    feedback_ANOVA_block_version(data_feedback_50_specific, version = "50")
+  ),
+  tar_target(
+    feedback_RM_ANOVA_reliability_version_50,
+    feedback_RM_ANOVA_reliability_version(data_feedback_50_specific, version = "50")
+  ),
+  tar_target(
+    feedback_RM_ANOVA_block_version_50,
+    feedback_RM_ANOVA_block_version(data_feedback_50_specific, version = "50")
   )
 )

@@ -1,228 +1,7 @@
 
-# library(targets)
-# library(here)
-# library(dplyr)
-# library(lme4)
-# library(sjPlot)
-# library(ggplot2)
-# library(flexplot)
-# library(glmmTMB)
+feedback_ANOVA_reliability_version <- function(data, version) {
 
-# data <- tar_read("data_reliance_70_specific")
-
-# analyze increasing and decreasing groups seperately
-seperate_increasing_vs_decreasing_LMES_70 <- function(data){
-
-  save_path <- here("output", "specific", "dependence_70", "seperate_increasing_vs_decreasing_LMES")
-  dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
-
-  data_increasing <- data %>%
-    filter(condition == "70% IR")
-
-  data_decreasing <- data %>%
-    filter(condition == "70% DR")
-
-  # Summarize data
-  block_summary_increasing <- data_increasing %>%
-    group_by(p_num, block) %>%
-    summarise(
-      trust = mean(trust, na.rm = TRUE),
-      confidence = mean(confidence, na.rm = TRUE),
-      reliability_level = mean(reliability_level, na.rm = TRUE),
-      performance = mean(percent_correct_block, na.rm = TRUE),
-      dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
-      .groups = "drop"
-    )
-  block_summary_decreasing <- data_decreasing %>%
-    group_by(p_num, block) %>%
-    summarise(
-      trust = mean(trust, na.rm = TRUE),
-      confidence = mean(confidence, na.rm = TRUE),
-      reliability_level = mean(reliability_level, na.rm = TRUE),
-      performance = mean(percent_correct_block, na.rm = TRUE),
-      dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
-      .groups = "drop"
-    )
-
-
-  #############
-  ### Model ###
-  #############
-
-  model_increasing <- lmer(
-    dependence ~ trust * confidence * reliability_level + (1 | p_num),
-    block_summary_increasing
-  )
-  # tab_model(model_increasing)
-  model_summary <- capture.output(summary(model_increasing))
-  writeLines(as.character(model_summary), here(save_path, "dependence_increasing_LME.txt"))
-  model_summary_formated <- tab_model(model_increasing)
-  writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_increasing_LME_formatted.html"))
-
-  model_decreasing <- lmer(
-    dependence ~ trust * confidence * reliability_level + (1 | p_num),
-    block_summary_decreasing
-  )
-  # tab_model(model_decreasing)
-  model_summary <- capture.output(summary(model_decreasing))
-  writeLines(as.character(model_summary), here(save_path, "dependence_decreasing_LME.txt"))
-  model_summary_formated <- tab_model(model_decreasing)
-  writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_decreasing_LME_formatted.html"))
-
-  # --- Beta Model ---
-  
-  # rescale dependence to be 0-1, then squeeze to open interval (0, 1)
-  # using Smithson & Verkuilen (2006) transformation for beta regression
-  block_summary_increasing <- block_summary_increasing %>%
-    mutate(dependence = (dependence - min(dependence, na.rm = TRUE)) /
-             (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE))) %>%
-    mutate(dependence = (dependence * (n() - 1) + 0.5) / n())
-
-  block_summary_decreasing <- block_summary_decreasing %>%
-    mutate(dependence = (dependence - min(dependence, na.rm = TRUE)) /
-             (max(dependence, na.rm = TRUE) - min(dependence, na.rm = TRUE))) %>%
-    mutate(dependence = (dependence * (n() - 1) + 0.5) / n())
-
-  # Fit beta regression model for increasing condition
-  model_increasing_beta <- glmmTMB(
-    dependence ~ trust * confidence * reliability_level + (1 | p_num),
-    data = block_summary_increasing,
-    family = beta_family(link = "logit")
-  )
-  model_summary <- capture.output(summary(model_increasing_beta))
-  writeLines(as.character(model_summary), here(save_path, "dependence_increasing_beta_LME.txt"))
-  model_summary_formated <- tab_model(model_increasing_beta)
-  writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_increasing_beta_LME_formatted.html"))
-
-  # Fit beta regression model for decreasing condition
-  
-
-  
-
-
-  #############
-  ### Plots ###
-  #############
-
-  # --- Dependence by Trust, and Reliability Level (Increasing) ---
-  p_increasing <- ggplot(block_summary_increasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
-    geom_point(alpha = 0.3) +
-    geom_smooth(method = "lm", alpha = 0.1) +
-    theme_minimal(base_size = 14) +
-    theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
-          legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-    labs(title = "Dependence by Trust, Confidence, and Reliability Level (Increasing)",
-        x = "Trust", y = "Dependence") #+
-    # xlim(0, 100) +
-    #ylim(0, 100)
-
-  # p_increasing
-
-  suppressMessages(ggsave(
-    here(save_path, "dependence_increasing_by_trust_reliability.png"),
-    plot = p_increasing, device = "png",
-    width = 10, height = 8
-  ))
-
-  # --- Dependence by Trust, Confidence, and Reliability Level (Decreasing) ---
-  p_decreasing <- ggplot(block_summary_decreasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
-    geom_point(alpha = 0.3) +
-    geom_smooth(method = "lm", alpha = 0.1) +
-    theme_minimal(base_size = 14) +
-    theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
-          legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-    labs(title = "Dependence by Trust and Reliability Level (Decreasing)",
-        x = "Trust", y = "Dependence") +
-    xlim(0, 100) +
-    ylim(0, 100)
-
-  # p_decreasing
-
-  suppressMessages(ggsave(
-    here(save_path, "dependence_decreasing_by_trust_reliability.png"),
-    plot = p_decreasing, device = "png",
-    width = 10, height = 8
-  ))
-
-  # p_decreasing <- ggplot(block_summary_decreasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
-  #   geom_point(alpha = 0.3) +
-  #   geom_smooth(method = "lm", alpha = 0.1) +
-  #   theme_minimal() +
-  #   labs(title = "Dependence by Trust, Confidence, and Reliability Level (Decreasing)",
-  #       x = "Trust", y = "Dependence") +
-  #   facet_wrap(~ reliability_level) +
-  #   xlim(0, 100) +
-  #   ylim(0, 100)
-
-  # suppressMessages(ggsave(
-  #   here(save_path, "dependence_decreasing_by_trust_reliability_facet.png"),
-  #   plot = p_decreasing, device = "png",
-  #   width = 10, height = 8
-  # ))
-
-  # make factor version of reliability_level
-  block_summary_decreasing <- block_summary_decreasing %>%
-    mutate(reliability_level_factor = as.factor(reliability_level))
-
-  p <- flexplot(
-    data = block_summary_decreasing,
-    dependence ~ trust + confidence | reliability_level_factor,
-    method = 'lm'
-  )
-
-  suppressMessages(ggsave(
-    here(save_path, "dependence_decreasing_by_trust_confidence_reliability_flexplot.png"),
-    plot = p, device = "png",
-    width = 15, height = 4
-  ))
-
-
-  p_decreasing <- ggplot(block_summary_decreasing, aes(x = confidence, y = dependence, color = as.factor(reliability_level))) +
-    geom_point(alpha = 0.3) +
-    geom_smooth(method = "lm", alpha = 0.1) +
-    theme_minimal(base_size = 14) +
-    theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
-          legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-    labs(title = "Dependence by Confidence, and Reliability Level (Decreasing)",
-        x = "Self-Confidence", y = "Dependence") +
-    xlim(0, 100) +
-    ylim(0, 100)
-
-  suppressMessages(ggsave(
-    here(save_path, "dependence_decreasing_by_confidence_reliability.png"),
-    plot = p_decreasing, device = "png",
-    width = 10, height = 8
-  ))
-
-  block_summary_decreasing <- block_summary_decreasing %>%
-    mutate(confidence_group = ifelse(confidence <= median(confidence, na.rm = TRUE), "Low", "High")) %>%
-    filter(!is.na(confidence_group))
-
-  # --- Dependence (y) by Trust (x) by Reliability Level (color) by Confidence (facet) for Decreasing condition ---
-  p_increasing_confidence <- ggplot(block_summary_decreasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
-    geom_point(alpha = 0.3) +
-    geom_smooth(method = "lm", alpha = 0.1) +
-    theme_minimal(base_size = 14) +
-    theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
-          legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-    labs(title = "Dependence by Trust, Reliability Level, Confidene (Decreasing)",
-        x = "Trust", y = "Dependence") +
-    facet_wrap(~ confidence_group) +
-    xlim(0, 100) +
-    ylim(0, 100)
-
-  suppressMessages(ggsave(
-    here(save_path, "dependence_increasing_by_trust_reliability_confidence_facet.png"),
-    plot = p_increasing_confidence, device = "png",
-    width = 12, height = 6
-  ))
-
-}
-
-
-dependence_LME_70 <- function(data, version){
-
-  save_path <- here("output", "specific", paste0("dependence_", version), "dependence_LME")
+  save_path <- here("output", "specific", paste0("feedback_", version), "feedback_ANOVA_reliability_version")
   dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
 
   # Summarize data
@@ -233,68 +12,10 @@ dependence_LME_70 <- function(data, version){
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
-      dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
 
-  #############
-  ### Model ###
-  #############
-
-  model <- lmer(
-    dependence ~ condition * trust * confidence * reliability_level + (1 | p_num),
-    block_summary
-  )
-  # tab_model(model)
-  model_summary <- capture.output(summary(model))
-  writeLines(as.character(model_summary), here(save_path, "dependence_LME.txt"))
-  model_summary_formated <- tab_model(model)
-  writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_LME_formatted.html"))
-
-  #############
-  ### Plots ###
-  #############
-
-  # plot dependence (y) by confidence (x) by reliability_level (color) by condition (facet)
-  p <- ggplot(block_summary, aes(x = confidence, y = dependence, color = as.factor(reliability_level))) +
-    geom_point(alpha = 0.3) +
-    geom_smooth(method = "lm", alpha = 0.1) +
-    theme_minimal(base_size = 14) +
-    theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
-          legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-    labs(# title = "Dependence by Confidence and Reliability Level",
-         x = "Self-Confidence", y = "Dependence") +
-    facet_wrap(~ condition) +
-    xlim(0, 100) +
-    ylim(0, 100)
-
-  suppressMessages(ggsave(
-    here(save_path, "dependence_by_confidence_reliability_facet.png"),
-    plot = p, device = "png",
-    width = 14, height = 6
-  ))
-
-}
-
-
-dependence_ANOVA_reliability_version <- function(data, version) {
-
-  save_path <- here("output", "specific", paste0("dependence_", version), "dependence_ANOVA_reliability_version")
-  dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
-
-  # Summarize data
-  block_summary <- data %>%
-    group_by(p_num, condition, block) %>%
-    summarise(
-      trust = mean(trust, na.rm = TRUE),
-      confidence = mean(confidence, na.rm = TRUE),
-      reliability_level = mean(reliability_level, na.rm = TRUE),
-      performance = mean(percent_correct_block, na.rm = TRUE),
-      dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
-      .groups = "drop"
-    )
-
-  variables <- c("trust", "performance", "confidence", "dependence")
+  variables <- c("trust", "performance", "confidence")
 
   # Save means by condition
   condition_means <- block_summary %>%
@@ -350,7 +71,7 @@ dependence_ANOVA_reliability_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub("70% ", "", x)) +
+      scale_color_discrete(labels = function(x) sub(paste0(version, "% "), "", x)) +
       labs(x = "Reliability Level", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
 
     plot_list[[variable]] <- p
@@ -364,22 +85,22 @@ dependence_ANOVA_reliability_version <- function(data, version) {
 
   # Combined figure with all DVs side by side
   combined <- plot_list[["trust"]] + plot_list[["confidence"]] +
-    plot_list[["performance"]] + plot_list[["dependence"]] +
+    plot_list[["performance"]] +
     plot_layout(nrow = 1, guides = "collect") &
     theme(legend.position = "bottom")
   suppressMessages(ggsave(
     here(save_path, "all_DVs_combined.png"),
     plot = combined, device = "png",
-    width = 20, height = 8
+    width = 15, height = 8
   ))
 
   return(invisible(TRUE))
 }
 
 
-dependence_ANOVA_block_version <- function(data, version) {
+feedback_ANOVA_block_version <- function(data, version) {
 
-  save_path <- here("output", "specific", paste0("dependence_", version), "dependence_ANOVA_block_version")
+  save_path <- here("output", "specific", paste0("feedback_", version), "feedback_ANOVA_block_version")
   dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
 
   # Summarize data
@@ -390,11 +111,10 @@ dependence_ANOVA_block_version <- function(data, version) {
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
-      dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
 
-  variables <- c("trust", "performance", "confidence", "dependence")
+  variables <- c("trust", "performance", "confidence")
 
   # Save means by condition
   condition_means <- block_summary %>%
@@ -450,7 +170,7 @@ dependence_ANOVA_block_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub("70% ", "", x)) +
+      scale_color_discrete(labels = function(x) sub(paste0(version, "% "), "", x)) +
       labs(x = "Block", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
 
     plot_list[[variable]] <- p
@@ -464,22 +184,22 @@ dependence_ANOVA_block_version <- function(data, version) {
 
   # Combined figure with all DVs side by side
   combined <- plot_list[["trust"]] + plot_list[["confidence"]] +
-    plot_list[["performance"]] + plot_list[["dependence"]] +
+    plot_list[["performance"]] +
     plot_layout(nrow = 1, guides = "collect") &
     theme(legend.position = "bottom")
   suppressMessages(ggsave(
     here(save_path, "all_DVs_combined.png"),
     plot = combined, device = "png",
-    width = 20, height = 8
+    width = 15, height = 8
   ))
 
   return(invisible(TRUE))
 }
 
 
-dependence_RM_ANOVA_reliability_version <- function(data, version) {
+feedback_RM_ANOVA_reliability_version <- function(data, version) {
 
-  save_path <- here("output", "specific", paste0("dependence_", version), "dependence_RM_ANOVA_reliability_version")
+  save_path <- here("output", "specific", paste0("feedback_", version), "feedback_RM_ANOVA_reliability_version")
   dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
 
   # Summarize data
@@ -490,7 +210,6 @@ dependence_RM_ANOVA_reliability_version <- function(data, version) {
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
-      dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
 
@@ -500,7 +219,7 @@ dependence_RM_ANOVA_reliability_version <- function(data, version) {
   # Set polynomial contrasts for trend analysis
   contrasts(block_summary$reliability_level_f) <- contr.poly(nlevels(block_summary$reliability_level_f))
 
-  variables <- c("trust", "performance", "confidence", "dependence")
+  variables <- c("trust", "performance", "confidence")
 
   # Save means by condition and reliability level
   condition_means <- block_summary %>%
@@ -583,7 +302,7 @@ dependence_RM_ANOVA_reliability_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub("70% ", "", x)) +
+      scale_color_discrete(labels = function(x) sub(paste0(version, "% "), "", x)) +
       labs(x = "Reliability Level", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
 
     plot_list[[variable]] <- p
@@ -597,22 +316,22 @@ dependence_RM_ANOVA_reliability_version <- function(data, version) {
 
   # Combined figure with all DVs side by side
   combined <- plot_list[["trust"]] + plot_list[["confidence"]] +
-    plot_list[["performance"]] + plot_list[["dependence"]] +
+    plot_list[["performance"]] +
     plot_layout(nrow = 1, guides = "collect") &
     theme(legend.position = "bottom")
   suppressMessages(ggsave(
     here(save_path, "all_DVs_combined.png"),
     plot = combined, device = "png",
-    width = 20, height = 8
+    width = 15, height = 8
   ))
 
   return(invisible(TRUE))
 }
 
 
-dependence_RM_ANOVA_block_version <- function(data, version) {
+feedback_RM_ANOVA_block_version <- function(data, version) {
 
-  save_path <- here("output", "specific", paste0("dependence_", version), "dependence_RM_ANOVA_block_version")
+  save_path <- here("output", "specific", paste0("feedback_", version), "feedback_RM_ANOVA_block_version")
   dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
 
   # Summarize data
@@ -623,7 +342,6 @@ dependence_RM_ANOVA_block_version <- function(data, version) {
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
-      dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
 
@@ -633,7 +351,7 @@ dependence_RM_ANOVA_block_version <- function(data, version) {
   # Set polynomial contrasts for trend analysis
   contrasts(block_summary$block_f) <- contr.poly(nlevels(block_summary$block_f))
 
-  variables <- c("trust", "performance", "confidence", "dependence")
+  variables <- c("trust", "performance", "confidence")
 
   # Save means by condition and block
   condition_means <- block_summary %>%
@@ -716,7 +434,7 @@ dependence_RM_ANOVA_block_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub("70% ", "", x)) +
+      scale_color_discrete(labels = function(x) sub(paste0(version, "% "), "", x)) +
       labs(x = "Block", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
 
     plot_list[[variable]] <- p
@@ -730,13 +448,13 @@ dependence_RM_ANOVA_block_version <- function(data, version) {
 
   # Combined figure with all DVs side by side
   combined <- plot_list[["trust"]] + plot_list[["confidence"]] +
-    plot_list[["performance"]] + plot_list[["dependence"]] +
+    plot_list[["performance"]] +
     plot_layout(nrow = 1, guides = "collect") &
     theme(legend.position = "bottom")
   suppressMessages(ggsave(
     here(save_path, "all_DVs_combined.png"),
     plot = combined, device = "png",
-    width = 20, height = 8
+    width = 15, height = 8
   ))
 
   return(invisible(TRUE))
