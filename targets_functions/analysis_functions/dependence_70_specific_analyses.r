@@ -290,11 +290,12 @@ dependence_ANOVA_reliability_version <- function(data, version) {
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
+      performance_post = mean(percent_correct_block2, na.rm = TRUE),
       dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
 
-  variables <- c("trust", "performance", "confidence", "dependence")
+  variables <- c("trust", "performance", "performance_post", "confidence", "dependence")
 
   # Save means by condition
   condition_means <- block_summary %>%
@@ -350,8 +351,13 @@ dependence_ANOVA_reliability_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub("70% ", "", x)) +
-      labs(x = "Reliability Level", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
+      scale_color_discrete(labels = function(x) {
+        x <- sub("^\\d+% ", "", x)
+        ifelse(x == "IR", "Increasing Reliability",
+          ifelse(x == "DR", "Decreasing Reliability", x))
+      }) +
+      labs(x = "Reliability Level", y = ifelse(variable == "confidence", "Self-Confidence",
+             ifelse(variable == "performance_post", "Post-Rec Performance", str_to_title(variable))))
 
     plot_list[[variable]] <- p
 
@@ -364,12 +370,23 @@ dependence_ANOVA_reliability_version <- function(data, version) {
 
   # Combined figure with all DVs side by side
   combined <- plot_list[["trust"]] + plot_list[["confidence"]] +
-    plot_list[["performance"]] + plot_list[["dependence"]] +
+    plot_list[["performance"]] + plot_list[["performance_post"]] + plot_list[["dependence"]] +
     plot_layout(nrow = 1, guides = "collect") &
     theme(legend.position = "bottom")
   suppressMessages(ggsave(
     here(save_path, "all_DVs_combined.png"),
     plot = combined, device = "png",
+    width = 25, height = 8
+  ))
+
+  # Combined figure without pre-rec performance
+  combined_post <- plot_list[["trust"]] + plot_list[["confidence"]] +
+    plot_list[["performance_post"]] + plot_list[["dependence"]] +
+    plot_layout(nrow = 1, guides = "collect") &
+    theme(legend.position = "bottom")
+  suppressMessages(ggsave(
+    here(save_path, "all_DVs_combined_post_rec.png"),
+    plot = combined_post, device = "png",
     width = 20, height = 8
   ))
 
@@ -390,11 +407,12 @@ dependence_ANOVA_block_version <- function(data, version) {
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
+      performance_post = mean(percent_correct_block2, na.rm = TRUE),
       dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
 
-  variables <- c("trust", "performance", "confidence", "dependence")
+  variables <- c("trust", "performance", "performance_post", "confidence", "dependence")
 
   # Save means by condition
   condition_means <- block_summary %>%
@@ -450,8 +468,13 @@ dependence_ANOVA_block_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub("70% ", "", x)) +
-      labs(x = "Block", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
+      scale_color_discrete(labels = function(x) {
+        x <- sub("^\\d+% ", "", x)
+        ifelse(x == "IR", "Increasing Reliability",
+          ifelse(x == "DR", "Decreasing Reliability", x))
+      }) +
+      labs(x = "Block", y = ifelse(variable == "confidence", "Self-Confidence",
+             ifelse(variable == "performance_post", "Post-Rec Performance", str_to_title(variable))))
 
     plot_list[[variable]] <- p
 
@@ -464,12 +487,23 @@ dependence_ANOVA_block_version <- function(data, version) {
 
   # Combined figure with all DVs side by side
   combined <- plot_list[["trust"]] + plot_list[["confidence"]] +
-    plot_list[["performance"]] + plot_list[["dependence"]] +
+    plot_list[["performance"]] + plot_list[["performance_post"]] + plot_list[["dependence"]] +
     plot_layout(nrow = 1, guides = "collect") &
     theme(legend.position = "bottom")
   suppressMessages(ggsave(
     here(save_path, "all_DVs_combined.png"),
     plot = combined, device = "png",
+    width = 25, height = 8
+  ))
+
+  # Combined figure without pre-rec performance
+  combined_post <- plot_list[["trust"]] + plot_list[["confidence"]] +
+    plot_list[["performance_post"]] + plot_list[["dependence"]] +
+    plot_layout(nrow = 1, guides = "collect") &
+    theme(legend.position = "bottom")
+  suppressMessages(ggsave(
+    here(save_path, "all_DVs_combined_post_rec.png"),
+    plot = combined_post, device = "png",
     width = 20, height = 8
   ))
 
@@ -490,6 +524,7 @@ dependence_RM_ANOVA_reliability_version <- function(data, version) {
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
+      performance_post = mean(percent_correct_block2, na.rm = TRUE),
       dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
@@ -500,7 +535,7 @@ dependence_RM_ANOVA_reliability_version <- function(data, version) {
   # Set polynomial contrasts for trend analysis
   contrasts(block_summary$reliability_level_f) <- contr.poly(nlevels(block_summary$reliability_level_f))
 
-  variables <- c("trust", "performance", "confidence", "dependence")
+  variables <- c("trust", "performance", "performance_post", "confidence", "dependence")
 
   # Save means by condition and reliability level
   condition_means <- block_summary %>%
@@ -583,8 +618,13 @@ dependence_RM_ANOVA_reliability_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub("70% ", "", x)) +
-      labs(x = "Reliability Level", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
+      scale_color_discrete(labels = function(x) {
+        x <- sub("^\\d+% ", "", x)
+        ifelse(x == "IR", "Increasing Reliability",
+          ifelse(x == "DR", "Decreasing Reliability", x))
+      }) +
+      labs(x = "Reliability Level", y = ifelse(variable == "confidence", "Self-Confidence",
+             ifelse(variable == "performance_post", "Post-Rec Performance", str_to_title(variable))))
 
     plot_list[[variable]] <- p
 
@@ -597,12 +637,23 @@ dependence_RM_ANOVA_reliability_version <- function(data, version) {
 
   # Combined figure with all DVs side by side
   combined <- plot_list[["trust"]] + plot_list[["confidence"]] +
-    plot_list[["performance"]] + plot_list[["dependence"]] +
+    plot_list[["performance"]] + plot_list[["performance_post"]] + plot_list[["dependence"]] +
     plot_layout(nrow = 1, guides = "collect") &
     theme(legend.position = "bottom")
   suppressMessages(ggsave(
     here(save_path, "all_DVs_combined.png"),
     plot = combined, device = "png",
+    width = 25, height = 8
+  ))
+
+  # Combined figure without pre-rec performance
+  combined_post <- plot_list[["trust"]] + plot_list[["confidence"]] +
+    plot_list[["performance_post"]] + plot_list[["dependence"]] +
+    plot_layout(nrow = 1, guides = "collect") &
+    theme(legend.position = "bottom")
+  suppressMessages(ggsave(
+    here(save_path, "all_DVs_combined_post_rec.png"),
+    plot = combined_post, device = "png",
     width = 20, height = 8
   ))
 
@@ -623,6 +674,7 @@ dependence_RM_ANOVA_block_version <- function(data, version) {
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
+      performance_post = mean(percent_correct_block2, na.rm = TRUE),
       dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
@@ -633,7 +685,7 @@ dependence_RM_ANOVA_block_version <- function(data, version) {
   # Set polynomial contrasts for trend analysis
   contrasts(block_summary$block_f) <- contr.poly(nlevels(block_summary$block_f))
 
-  variables <- c("trust", "performance", "confidence", "dependence")
+  variables <- c("trust", "performance", "performance_post", "confidence", "dependence")
 
   # Save means by condition and block
   condition_means <- block_summary %>%
@@ -716,8 +768,13 @@ dependence_RM_ANOVA_block_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub("70% ", "", x)) +
-      labs(x = "Block", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
+      scale_color_discrete(labels = function(x) {
+        x <- sub("^\\d+% ", "", x)
+        ifelse(x == "IR", "Increasing Reliability",
+          ifelse(x == "DR", "Decreasing Reliability", x))
+      }) +
+      labs(x = "Block", y = ifelse(variable == "confidence", "Self-Confidence",
+             ifelse(variable == "performance_post", "Post-Rec Performance", str_to_title(variable))))
 
     plot_list[[variable]] <- p
 
@@ -730,12 +787,23 @@ dependence_RM_ANOVA_block_version <- function(data, version) {
 
   # Combined figure with all DVs side by side
   combined <- plot_list[["trust"]] + plot_list[["confidence"]] +
-    plot_list[["performance"]] + plot_list[["dependence"]] +
+    plot_list[["performance"]] + plot_list[["performance_post"]] + plot_list[["dependence"]] +
     plot_layout(nrow = 1, guides = "collect") &
     theme(legend.position = "bottom")
   suppressMessages(ggsave(
     here(save_path, "all_DVs_combined.png"),
     plot = combined, device = "png",
+    width = 25, height = 8
+  ))
+
+  # Combined figure without pre-rec performance
+  combined_post <- plot_list[["trust"]] + plot_list[["confidence"]] +
+    plot_list[["performance_post"]] + plot_list[["dependence"]] +
+    plot_layout(nrow = 1, guides = "collect") &
+    theme(legend.position = "bottom")
+  suppressMessages(ggsave(
+    here(save_path, "all_DVs_combined_post_rec.png"),
+    plot = combined_post, device = "png",
     width = 20, height = 8
   ))
 
