@@ -71,8 +71,13 @@ feedback_ANOVA_reliability_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub(paste0(version, "% "), "", x)) +
-      labs(x = "Reliability Level", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
+      scale_color_discrete(labels = function(x) {
+        ifelse(startsWith(sub(paste0(version, "% "), "", x), "I"),
+               "Increasing", "Decreasing")
+      }) +
+      labs(x = "Reliability Level",
+           y = ifelse(variable == "confidence",
+                      "Self-Confidence", str_to_title(variable)))
 
     plot_list[[variable]] <- p
 
@@ -170,8 +175,13 @@ feedback_ANOVA_block_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub(paste0(version, "% "), "", x)) +
-      labs(x = "Block", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
+      scale_color_discrete(labels = function(x) {
+        ifelse(startsWith(sub(paste0(version, "% "), "", x), "I"),
+               "Increasing", "Decreasing")
+      }) +
+      labs(x = "Block",
+           y = ifelse(variable == "confidence",
+                      "Self-Confidence", str_to_title(variable)))
 
     plot_list[[variable]] <- p
 
@@ -302,8 +312,13 @@ feedback_RM_ANOVA_reliability_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub(paste0(version, "% "), "", x)) +
-      labs(x = "Reliability Level", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
+      scale_color_discrete(labels = function(x) {
+        ifelse(startsWith(sub(paste0(version, "% "), "", x), "I"),
+               "Increasing", "Decreasing")
+      }) +
+      labs(x = "Reliability Level",
+           y = ifelse(variable == "confidence",
+                      "Self-Confidence", str_to_title(variable)))
 
     plot_list[[variable]] <- p
 
@@ -434,8 +449,13 @@ feedback_RM_ANOVA_block_version <- function(data, version) {
       theme_minimal(base_size = 14) +
       theme(legend.position = c(0.95, 0.05), legend.justification = c(1, 0),
             legend.background = element_rect(fill = alpha("white", 0.8), color = NA)) +
-      scale_color_discrete(labels = function(x) sub(paste0(version, "% "), "", x)) +
-      labs(x = "Block", y = ifelse(variable == "confidence", "Self-Confidence", str_to_title(variable)))
+      scale_color_discrete(labels = function(x) {
+        ifelse(startsWith(sub(paste0(version, "% "), "", x), "I"),
+               "Increasing", "Decreasing")
+      }) +
+      labs(x = "Block",
+           y = ifelse(variable == "confidence",
+                      "Self-Confidence", str_to_title(variable)))
 
     plot_list[[variable]] <- p
 

@@ -56,7 +56,7 @@ seperate_increasing_vs_decreasing_LMES_70 <- function(data){
   # tab_model(model_increasing)
   model_summary <- capture.output(summary(model_increasing))
   writeLines(as.character(model_summary), here(save_path, "dependence_increasing_LME.txt"))
-  model_summary_formated <- tab_model(model_increasing)
+  model_summary_formated <- tab_model(model_increasing, show.stat = TRUE)
   writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_increasing_LME_formatted.html"))
 
   model_decreasing <- lmer(
@@ -66,7 +66,7 @@ seperate_increasing_vs_decreasing_LMES_70 <- function(data){
   # tab_model(model_decreasing)
   model_summary <- capture.output(summary(model_decreasing))
   writeLines(as.character(model_summary), here(save_path, "dependence_decreasing_LME.txt"))
-  model_summary_formated <- tab_model(model_decreasing)
+  model_summary_formated <- tab_model(model_decreasing, show.stat = TRUE)
   writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_decreasing_LME_formatted.html"))
 
   # --- Beta Model ---
@@ -91,7 +91,7 @@ seperate_increasing_vs_decreasing_LMES_70 <- function(data){
   )
   model_summary <- capture.output(summary(model_increasing_beta))
   writeLines(as.character(model_summary), here(save_path, "dependence_increasing_beta_LME.txt"))
-  model_summary_formated <- tab_model(model_increasing_beta)
+  model_summary_formated <- tab_model(model_increasing_beta, show.stat = TRUE)
   writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_increasing_beta_LME_formatted.html"))
 
   # Fit beta regression model for decreasing condition
@@ -248,7 +248,7 @@ dependence_LME_70 <- function(data, version){
   # tab_model(model)
   model_summary <- capture.output(summary(model))
   writeLines(as.character(model_summary), here(save_path, "dependence_LME.txt"))
-  model_summary_formated <- tab_model(model)
+  model_summary_formated <- tab_model(model, show.stat = TRUE)
   writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_LME_formatted.html"))
 
   #############
