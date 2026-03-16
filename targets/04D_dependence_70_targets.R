@@ -36,10 +36,18 @@ list(
   tar_target(
         seperate_increasing_vs_decreasing_analysis_70,
         seperate_increasing_vs_decreasing_LMES_70(data_reliance_70_specific)
-    ), 
+    ),
+    tar_target(
+        seperate_increasing_vs_decreasing_analysis_block_70,
+        seperate_increasing_vs_decreasing_LMES_using_block_70(data_reliance_70_specific)
+    ),
     tar_target(
         dependence_general_LME_70,
         dependence_LME_70(data_reliance_70_specific, version = "70")
+    ),
+    tar_target(
+        dependence_general_LME_using_block_70,
+        dependence_LME_using_block_70(data_reliance_70_specific, version = "70")
     ),
     tar_target(
         dependence_ANOVA_reliability_version_70,

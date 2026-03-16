@@ -57,9 +57,9 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
   )
   # tab_model(model_increasing)
   model_summary <- capture.output(summary(model_increasing))
-  writeLines(as.character(model_summary), here(save_path, "dependence_increasing_LME.txt"))
+  writeLines(as.character(model_summary), here(save_path, "dependence_50_increasing_LME.txt"))
   model_summary_formated <- tab_model(model_increasing, show.stat = TRUE)
-  writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_increasing_LME_formatted.html"))
+  writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_50_increasing_LME_formatted.html"))
 
   model_decreasing <- lmer(
     dependence ~ trust * confidence * reliability_level + (1 | p_num),
@@ -67,9 +67,9 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
   )
   # tab_model(model_decreasing)
   model_summary <- capture.output(summary(model_decreasing))
-  writeLines(as.character(model_summary), here(save_path, "dependence_decreasing_LME.txt"))
+  writeLines(as.character(model_summary), here(save_path, "dependence_50_decreasing_LME.txt"))
   model_summary_formated <- tab_model(model_decreasing, show.stat = TRUE)
-  writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_decreasing_LME_formatted.html"))
+  writeLines(as.character(model_summary_formated$knitr), here(save_path, "dependence_50_decreasing_LME_formatted.html"))
 
   # --- Beta Model ---
   
@@ -116,7 +116,7 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
   # p_increasing
 
   suppressMessages(ggsave(
-    here(save_path, "dependence_increasing_by_trust_reliability.png"),
+    here(save_path, "dependence_50_increasing_by_trust_reliability.png"),
     plot = p_increasing, device = "png",
     width = 10, height = 8
   ))
@@ -140,12 +140,12 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     labs(title = "Dependence by Trust and Reliability Level (Decreasing)",
         x = "Trust", y = "Dependence") +
     xlim(0, 100) +
-    ylim(0, 100)
+    ylim(0, 1)
 
   # p_decreasing
 
   suppressMessages(ggsave(
-    here(save_path, "dependence_decreasing_by_trust_reliability.png"),
+    here(save_path, "dependence_50_decreasing_by_trust_reliability.png"),
     plot = p_decreasing, device = "png",
     width = 10, height = 8
   ))
@@ -177,7 +177,7 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
   )
 
   suppressMessages(ggsave(
-    here(save_path, "dependence_decreasing_by_trust_confidence_reliability_flexplot.png"),
+    here(save_path, "dependence_50_decreasing_by_trust_confidence_reliability_flexplot.png"),
     plot = p, device = "png",
     width = 15, height = 4
   ))
@@ -190,10 +190,10 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     labs(title = "Dependence by Confidence, and Reliability Level (Decreasing)",
         x = "COnfidence", y = "Dependence") +
     xlim(0, 100) +
-    ylim(0, 100)
+    ylim(0, 1)
 
   suppressMessages(ggsave(
-    here(save_path, "dependence_decreasing_by_confidence_reliability.png"),
+    here(save_path, "dependence_50_decreasing_by_confidence_reliability.png"),
     plot = p_decreasing, device = "png",
     width = 10, height = 8
   ))
@@ -211,10 +211,10 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
         x = "Trust", y = "Dependence") +
     facet_wrap(~ confidence_group) +
     xlim(0, 100) +
-    ylim(0, 100)
+    ylim(0, 1)
 
   suppressMessages(ggsave(
-    here(save_path, "dependence_increasing_by_trust_reliability_confidence_facet.png"),
+    here(save_path, "dependence_50_increasing_by_trust_reliability_confidence_facet.png"),
     plot = p_increasing_confidence, device = "png",
     width = 12, height = 6
   ))
@@ -256,7 +256,7 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     )
 
   suppressMessages(ggsave(
-    here(save_path, "parallel_coordinates_increasing.png"),
+    here(save_path, "parallel_coordinates_50_increasing.png"),
     plot = p_parcoord_increasing, device = "png",
     width = 10, height = 8
   ))
@@ -298,7 +298,7 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     )
 
   suppressMessages(ggsave(
-    here(save_path, "parallel_coordinates_decreasing.png"),
+    here(save_path, "parallel_coordinates_50_decreasing.png"),
     plot = p_parcoord_decreasing, device = "png",
     width = 10, height = 8
   ))
