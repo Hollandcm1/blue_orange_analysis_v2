@@ -18,6 +18,9 @@ packages:
   - mediation
   - lavaan
   - car
+  - emmeans
+  - interactions
+  - multcomp
 
   # Visualization
   - ggplot2       

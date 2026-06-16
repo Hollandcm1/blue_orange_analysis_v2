@@ -32,6 +32,7 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
+      performance_post = mean(percent_correct_block2, na.rm = TRUE),
       dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
@@ -42,6 +43,7 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
+      performance_post = mean(percent_correct_block2, na.rm = TRUE),
       dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
@@ -188,7 +190,7 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
     labs(title = "Dependence by Confidence, and Reliability Level (Decreasing)",
-        x = "COnfidence", y = "Dependence") +
+        x = "Confidence", y = "Dependence") +
     xlim(0, 100) +
     ylim(0, 1)
 
@@ -198,17 +200,17 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     width = 10, height = 8
   ))
 
-  block_summary_decreasing <- block_summary_decreasing %>%
+  block_summary_increasing <- block_summary_increasing %>%
     mutate(confidence_group = ifelse(confidence <= median(confidence, na.rm = TRUE), "Low", "High")) %>%
     filter(!is.na(confidence_group))
 
-  # --- Dependence (y) by Trust (x) by Reliability Level (color) by Confidence (facet) for Decreasing condition ---
-  p_increasing_confidence <- ggplot(block_summary_decreasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
+  # --- Dependence (y) by Trust (x) by Reliability Level (color) by Confidence (facet) for Increasing condition ---
+  p_increasing_confidence <- ggplot(block_summary_increasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
     geom_point(alpha = 0.3) +
     geom_smooth(method = "lm", alpha = 0.1) +
     theme_minimal() +
-    labs(title = "Dependence by Trust, Reliability Level, Confidene (Decreasing)",
-        x = "Trust", y = "Dependence") +
+    labs(title = "Dependence by Trust, Reliability Level, Confidence (Increasing)",
+         x = "Trust", y = "Dependence") +
     facet_wrap(~ confidence_group) +
     xlim(0, 100) +
     ylim(0, 1)
@@ -217,6 +219,79 @@ seperate_increasing_vs_decreasing_LMES_50 <- function(data){
     here(save_path, "dependence_50_increasing_by_trust_reliability_confidence_facet.png"),
     plot = p_increasing_confidence, device = "png",
     width = 12, height = 6
+  ))
+
+  # --- Same plot but confidence split into 3 groups (terciles) for Increasing condition ---
+  inc_terciles <- quantile(block_summary_increasing$confidence, probs = c(1/3, 2/3), na.rm = TRUE)
+  block_summary_increasing <- block_summary_increasing %>%
+    mutate(confidence_group3 = case_when(
+      confidence <= inc_terciles[1] ~ "Low",
+      confidence <= inc_terciles[2] ~ "Medium",
+      TRUE                          ~ "High"
+    )) %>%
+    mutate(confidence_group3 = factor(confidence_group3, levels = c("Low", "Medium", "High")))
+
+  p_increasing_confidence3 <- ggplot(block_summary_increasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal() +
+    labs(title = "Dependence by Trust, Reliability Level, Confidence Tercile (Increasing)",
+         x = "Trust", y = "Dependence", color = "Reliability Level") +
+    facet_wrap(~ confidence_group3) +
+    xlim(0, 100) +
+    ylim(0, 1)
+
+  suppressMessages(ggsave(
+    here(save_path, "dependence_50_increasing_by_trust_reliability_confidence3_facet.png"),
+    plot = p_increasing_confidence3, device = "png",
+    width = 16, height = 6
+  ))
+
+  block_summary_decreasing <- block_summary_decreasing %>%
+    mutate(confidence_group = ifelse(confidence <= median(confidence, na.rm = TRUE), "Low", "High")) %>%
+    filter(!is.na(confidence_group))
+
+  # --- Dependence (y) by Trust (x) by Reliability Level (color) by Confidence (facet) for Decreasing condition ---
+  p_decreasing_confidence <- ggplot(block_summary_decreasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal() +
+    labs(title = "Dependence by Trust, Reliability Level, Confidence (Decreasing)",
+         x = "Trust", y = "Dependence") +
+    facet_wrap(~ confidence_group) +
+    xlim(0, 100) +
+    ylim(0, 1)
+
+  suppressMessages(ggsave(
+    here(save_path, "dependence_50_decreasing_by_trust_reliability_confidence_facet.png"),
+    plot = p_decreasing_confidence, device = "png",
+    width = 12, height = 6
+  ))
+
+  # --- Same plot but confidence split into 3 groups (terciles) for Decreasing condition ---
+  dec_terciles <- quantile(block_summary_decreasing$confidence, probs = c(1/3, 2/3), na.rm = TRUE)
+  block_summary_decreasing <- block_summary_decreasing %>%
+    mutate(confidence_group3 = case_when(
+      confidence <= dec_terciles[1] ~ "Low",
+      confidence <= dec_terciles[2] ~ "Medium",
+      TRUE                          ~ "High"
+    )) %>%
+    mutate(confidence_group3 = factor(confidence_group3, levels = c("Low", "Medium", "High")))
+
+  p_decreasing_confidence3 <- ggplot(block_summary_decreasing, aes(x = trust, y = dependence, color = as.factor(reliability_level))) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal() +
+    labs(title = "Dependence by Trust, Reliability Level, Confidence Tercile (Decreasing)",
+         x = "Trust", y = "Dependence", color = "Reliability Level") +
+    facet_wrap(~ confidence_group3) +
+    xlim(0, 100) +
+    ylim(0, 1)
+
+  suppressMessages(ggsave(
+    here(save_path, "dependence_50_decreasing_by_trust_reliability_confidence3_facet.png"),
+    plot = p_decreasing_confidence3, device = "png",
+    width = 16, height = 6
   ))
 
   # --- Parallel Coordinates Plot (Increasing) ---
@@ -319,6 +394,7 @@ dependence_LME_50 <- function(data, version){
       confidence = mean(confidence, na.rm = TRUE),
       reliability_level = mean(reliability_level, na.rm = TRUE),
       performance = mean(percent_correct_block, na.rm = TRUE),
+      performance_post = mean(percent_correct_block2, na.rm = TRUE),
       dependence = mean(percent_dependence_block_when_possible, na.rm = TRUE),
       .groups = "drop"
     )
@@ -343,4 +419,121 @@ dependence_LME_50 <- function(data, version){
 
   # not being done due to complexity
 
-} 
+}
+
+
+performance_by_reliability_condition_50 <- function(data, version) {
+
+  save_path <- here("output", "specific", paste0("dependence_", version), "performance_by_reliability_condition")
+  dir.create(save_path, showWarnings = FALSE, recursive = TRUE)
+
+  # Summarize data
+  block_summary <- data %>%
+    group_by(p_num, condition, block) %>%
+    summarise(
+      reliability_level = mean(reliability_level, na.rm = TRUE),
+      performance       = mean(percent_correct_block,  na.rm = TRUE),
+      performance_post  = mean(percent_correct_block2, na.rm = TRUE),
+      .groups = "drop"
+    )
+
+  condition_labels <- function(x) {
+    x <- sub("^\\d+% ", "", x)
+    ifelse(x == "IR", "Increasing Reliability",
+      ifelse(x == "DR", "Decreasing Reliability", x))
+  }
+
+  # --- Plot 1: Unaided Performance (pre-recommendation) ---
+  p_unaided <- ggplot(block_summary, aes(x = reliability_level, y = performance, color = condition)) +
+    geom_beeswarm(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal(base_size = 14) +
+    theme(
+      legend.position    = c(0.95, 0.05),
+      legend.justification = c(1, 0),
+      legend.background  = element_rect(fill = alpha("white", 0.8), color = NA)
+    ) +
+    scale_color_discrete(labels = condition_labels) +
+    labs(
+      x     = "Reliability Level",
+      y     = "Unaided Performance (%)",
+      color = "Condition"
+    )
+
+  suppressMessages(ggsave(
+    here(save_path, paste0(version, "_unaided_performance_by_reliability_and_condition.png")),
+    plot = p_unaided, device = "png",
+    width = 8, height = 8
+  ))
+
+  # --- Plot 2: Aided Performance (post-recommendation) ---
+  p_aided <- ggplot(block_summary, aes(x = reliability_level, y = performance_post, color = condition)) +
+    geom_beeswarm(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal(base_size = 14) +
+    theme(
+      legend.position    = c(0.95, 0.05),
+      legend.justification = c(1, 0),
+      legend.background  = element_rect(fill = alpha("white", 0.8), color = NA)
+    ) +
+    scale_color_discrete(labels = condition_labels) +
+    labs(
+      x     = "Reliability Level",
+      y     = "Aided Performance (%)",
+      color = "Condition"
+    )
+
+  suppressMessages(ggsave(
+    here(save_path, paste0(version, "_aided_performance_by_reliability_and_condition.png")),
+    plot = p_aided, device = "png",
+    width = 8, height = 8
+  ))
+
+  # --- Plot 3: Unaided Performance by Block ---
+  p_unaided_block <- ggplot(block_summary, aes(x = block, y = performance, color = condition)) +
+    geom_beeswarm(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal(base_size = 14) +
+    theme(
+      legend.position    = c(0.95, 0.95),
+      legend.justification = c(1, 1),
+      legend.background  = element_rect(fill = alpha("white", 0.8), color = NA)
+    ) +
+    scale_color_discrete(labels = condition_labels) +
+    labs(
+      x     = "Block",
+      y     = "Unaided Performance (%)",
+      color = "Condition"
+    )
+
+  suppressMessages(ggsave(
+    here(save_path, paste0(version, "_unaided_performance_by_block_and_condition.png")),
+    plot = p_unaided_block, device = "png",
+    width = 8, height = 8
+  ))
+
+  # --- Plot 4: Aided Performance by Block ---
+  p_aided_block <- ggplot(block_summary, aes(x = block, y = performance_post, color = condition)) +
+    geom_beeswarm(alpha = 0.3) +
+    geom_smooth(method = "lm", alpha = 0.1) +
+    theme_minimal(base_size = 14) +
+    theme(
+      legend.position    = c(0.95, 0.95),
+      legend.justification = c(1, 1),
+      legend.background  = element_rect(fill = alpha("white", 0.8), color = NA)
+    ) +
+    scale_color_discrete(labels = condition_labels) +
+    labs(
+      x     = "Block",
+      y     = "Aided Performance (%)",
+      color = "Condition"
+    )
+
+  suppressMessages(ggsave(
+    here(save_path, paste0(version, "_aided_performance_by_block_and_condition.png")),
+    plot = p_aided_block, device = "png",
+    width = 8, height = 8
+  ))
+
+  return(invisible(TRUE))
+}

@@ -39,8 +39,16 @@ list(
         seperate_increasing_vs_decreasing_LMES_50(data_reliance_50_specific)
     ), 
     tar_target(
-        dependence_general_LME_50, 
+        dependence_general_LME_50,
         dependence_LME_50(data_reliance_50_specific, version = "50")
+    ),
+    tar_target(
+        performance_by_reliability_condition_50,
+        performance_by_reliability_condition_50(data_reliance_50_specific, version = "50")
+    ),
+    tar_target(
+        dependence_50_trust_reliability_posthoc,
+        trust_reliability_posthoc_50_increasing(data_reliance_50_specific)
     )
 
 
